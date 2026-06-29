@@ -10,44 +10,12 @@ const APP_HTML = `
         </div>
         <button id="loginBtn">Login</button>
         <div id="loginError" class="login-error"></div>
-        <div class="login-links">
-            <a href="#" id="showRegistrationBtn">Registration</a>
-            <span class="login-link-sep">|</span>
-            <a href="#" id="showHowToRegBtn">How to registration?</a>
-        </div>
         <div class="login-info">Data verified GEX Corporation</div>
-    </div>
-    <div id="howToRegModal" class="modal-overlay login-how-to-modal" style="display:none;">
-        <div class="modal-content how-to-reg-modal">
-            <span class="modal-close" id="closeHowToRegBtn">&times;</span>
-            <h2>How to Registration?</h2>
-            <div id="howToRegContent" class="how-to-reg-content">Loading...</div>
-        </div>
-    </div>
-</div>
-
-<div id="registrationOverlay" class="login-sub-overlay" style="display:none;">
-    <div class="login-card">
-        <h2>📝 Registration</h2>
-        <input type="text" id="regName" placeholder="Name">
-        <input type="text" id="regAddress" placeholder="Address">
-        <input type="text" id="regMobile" placeholder="Mobile Number">
-        <button id="submitRegistrationBtn">Registration</button>
-        <button id="backToLoginBtn" class="btn-back-login">Back to Login</button>
-        <div id="regError" class="login-error"></div>
-        <div id="regSuccess" class="login-success"></div>
     </div>
 </div>
 
 <div class="invoice-wrapper" id="mainInvoiceWrapper">
     <div class="invoice-container screen-dark" id="invoiceArea">
-        <div id="adminRateToggleWrap" class="admin-rate-toggle no-print" style="display:none;">
-            <label for="adminRateTypeSelect">Rate Type:</label>
-            <select id="adminRateTypeSelect">
-                <option value="dealer">Dealer Rate</option>
-                <option value="mpo">MPO Rate</option>
-            </select>
-        </div>
         <div class="header">
             <div class="left-header">
                 <div class="logo-area">
@@ -145,9 +113,8 @@ const APP_HTML = `
                 <textarea id="invoiceNote" rows="2" placeholder="Any necessary notes..."></textarea>
             </div>
             <div class="action-buttons">
-                <button id="adminPanelBtn" class="btn btn-warning no-print" style="display:none;">⚙️ Admin Panel <span id="adminNotificationBadge" class="notification-badge" style="display:none;">0</span></button>
+                <button id="adminPanelBtn" class="btn btn-warning no-print" style="display:none;">⚙️ Admin Panel</button>
                 <button id="sellHistoryBtn" class="btn btn-primary no-print">📊 Sell History</button>
-                <button id="viewPrintBtn" class="btn btn-info no-print">👁️ View Print</button>
                 <button id="printBtn" class="btn btn-success no-print">🖨️ Print</button>
             </div>
         </div>
@@ -157,17 +124,6 @@ const APP_HTML = `
                 <input type="text" id="productSearchInput" placeholder="Search product..." autocomplete="off">
                 <div class="product-list" id="productSearchList"></div>
             </div>
-        </div>
-    </div>
-
-    <div id="viewPrintModal" class="modal-overlay no-print" style="display:none;">
-        <div class="modal-content view-print-modal">
-            <div class="view-print-header">
-                <h2>👁️ Print Preview</h2>
-                <button id="viewPrintModalPrintBtn" class="btn btn-success">🖨️ Print</button>
-                <span class="modal-close" id="closeViewPrintBtn">&times;</span>
-            </div>
-            <div id="viewPrintPreviewArea" class="view-print-preview-area"></div>
         </div>
     </div>
 
@@ -200,6 +156,16 @@ const APP_HTML = `
                     <tbody id="sellHistoryBody"></tbody>
                 </table>
             </div>
+            <div class="sell-history-invoices-section">
+                <h3>📜 My Invoices</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>Date</th><th>Invoice No</th><th>Total Amount</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="sellHistoryInvoicesBody"></tbody>
+                    </table>
+                </div>
+                <div id="sellHistoryLoadMoreContainer" class="sell-history-load-more"></div>
+            </div>
         </div>
     </div>
 
@@ -213,7 +179,6 @@ const APP_HTML = `
                 <button class="admin-tab-btn" id="productTabBtn">🛍️ Product Management</button>
                 <button class="admin-tab-btn" id="stockTabBtn">📦 Stock Management</button>
                 <button class="admin-tab-btn" id="userTabBtn">👥 User Management</button>
-                <button class="admin-tab-btn" id="notificationTabBtn">🔔 Notifications <span id="notificationBadge" class="notification-badge" style="display:none;">0</span></button>
                 <button class="admin-tab-btn" id="backupTabBtn">🗂️ Backup & Restore</button>
                 <button class="admin-tab-btn" id="settingsTabBtn">⚙️ Settings</button>
             </div>
@@ -223,6 +188,7 @@ const APP_HTML = `
                 <div class="admin-section-header">
                     <h3>📊 All Users Sales Monitor</h3>
                     <div class="admin-header-actions">
+                        <button class="btn btn-info btn-sm delete-notif-btn" id="deleteNotifBtn" title="Pending Delete Requests">🔔 Notifications<span id="deleteNotifBadge" class="notif-badge" style="display:none;">0</span></button>
                         <button class="btn btn-warning btn-sm" id="refreshMonitorBtn">🔄 Refresh</button>
                         <button class="btn btn-danger btn-sm" id="deleteAllSalesBtn">Delete All</button>
                     </div>
@@ -316,8 +282,7 @@ const APP_HTML = `
                             <thead>
                                 <tr class="product-form-header">
                                     <th class="product-name-th">Product Name</th>
-                                    <th class="product-price-th">Dealer Price</th>
-                                    <th class="product-price-th">MPO Price</th>
+                                    <th class="product-price-th">Unit Price (Optional)</th>
                                     <th class="product-action-th"></th>
                                 </tr>
                             </thead>
@@ -347,7 +312,7 @@ const APP_HTML = `
 
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Product Name</th><th>Dealer Price</th><th>MPO Price</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Product Name</th><th>Price</th><th>Action</th></tr></thead>
                         <tbody id="productTableBody"></tbody>
                     </table>
                 </div>
@@ -370,36 +335,20 @@ const APP_HTML = `
                 <div class="add-product-form">
                     <input type="text" id="newRegUsername" placeholder="New Username">
                     <input type="text" id="newRegPassword" placeholder="Password">
-                    <select id="newRegUserType" class="user-type-select">
-                        <option value="dealer">Dealer</option>
-                        <option value="mpo">MPO</option>
-                    </select>
                     <button class="btn btn-success" id="createUserBtn">Create User</button>
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Username</th><th>Password</th><th>Type</th><th>Action</th></tr></thead>
+                        <thead><tr><th>Username</th><th>Password</th><th>Action</th></tr></thead>
                         <tbody id="userTableBody"></tbody>
                     </table>
-                </div>
-            </div>
-
-            <!-- Notifications Section -->
-            <div id="notificationSection" class="admin-section display-none">
-                <div class="admin-section-header">
-                    <h3>🔔 Registration Notifications</h3>
-                    <button class="btn btn-danger btn-sm" id="deleteAllNotificationsBtn">Delete All</button>
-                </div>
-                <div id="notificationList" class="notification-list"></div>
-                <div class="notification-load-more-wrap">
-                    <button class="btn btn-primary btn-sm" id="loadMoreNotificationsBtn" style="display:none;">Load More</button>
                 </div>
             </div>
 
     <!-- Backup Section -->
             <div id="backupSection" class="admin-section display-none">
                 <h3>🗂️ Backup & Restore System</h3>
-                <p class="settings-info backup-intro">Exports all Firebase collections (users, invoices, products, customers, stocks, settings, registrations) plus full local browser cache snapshot.</p>
+                <p class="settings-info backup-intro">Exports all Firebase collections (users, invoices, products, customers, stocks, settings) plus full local browser cache snapshot.</p>
                 <div class="backup-restore-card">
                     <div class="backup-actions">
                         <button class="btn btn-primary" id="exportDataBtn">📤 Export All Data (JSON)</button>
@@ -456,6 +405,15 @@ const APP_HTML = `
         </div>
     </div>
 
+    <!-- Delete Request Notification Modal -->
+    <div id="deleteNotifModal" class="modal-overlay no-print" style="display:none;">
+        <div class="modal-content delete-notif-modal">
+            <span class="modal-close" id="closeDeleteNotifBtn">&times;</span>
+            <h2>🔔 Pending Delete Requests</h2>
+            <div id="deleteNotifList" class="delete-notif-list"></div>
+        </div>
+    </div>
+
     <!-- Full Data Clean Confirmation Modal -->
     <div id="cleanConfirmModal" class="modal-overlay no-print">
         <div class="modal-content clean-confirm-modal">
@@ -506,7 +464,7 @@ function renderApp() {
 }
 
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, query, where, orderBy, limit, serverTimestamp, startAfter, writeBatch, increment, Timestamp, getCountFromServer } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, doc, query, where, orderBy, limit, serverTimestamp, startAfter, writeBatch, increment, Timestamp } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCsOe9szTWsAridmVbma-2xLUYXbsC8r0g",
@@ -535,19 +493,13 @@ const LOGIN_SESSION_KEY = 'invoice_logged_in_user_v1';
 const REMEMBER_ME_KEY = 'invoice_remembered_user';
 
 let currentUser = null;
-let currentUserType = 'dealer';
 let globalProductMap = {}; // productId -> productData
-let notificationLastDoc = null;
-const NOTIFICATION_PAGE_SIZE = 5;
-const HOW_TO_REG_URLS = [
-    'https://raw.githubusercontent.com/2dgameralif/srhealthcare-resource/main/How%20To%20Reg.txt',
-    'https://cdn.jsdelivr.net/gh/2dgameralif/srhealthcare-resource@main/How%20To%20Reg.txt'
-];
 let globalStockMap = {}; // productId -> quantity
 let globalCustomerList = [];
 let activeProductInput = null;
 let printReplacements = [];
 let savedPageTitle = null;
+let reloadAfterPrint = false;
 const MOBILE_SUGGESTION_MQ = window.matchMedia('(max-width: 768px)');
 
 // Pagination state
@@ -558,7 +510,11 @@ let monitorServerMode = false;
 const MONITOR_PAGE_SIZE = 50;
 const MONITOR_CACHE_MAX = 100;
 const ADMIN_MONITOR_CACHE = 'admin_sales_monitor_cache_v1';
+const SELL_HISTORY_PAGE_SIZE = 10;
+const SELL_HISTORY_CACHE_MAX = 10;
 let currentDetailUserId = null; // To track which user is being viewed in detail
+let deleteNotifPollInterval = null;
+let sellHistoryLastDoc = null;
 
 function debounce(func, wait) {
     let timeout;
@@ -580,8 +536,7 @@ const CACHE_KEYS = {
 };
 
 const ADMIN_USERS_CACHE = 'admin_cached_users_list_v1';
-const FIRESTORE_BACKUP_COLLECTIONS = ["users", "invoices", "products", "customers", "stocks", "settings", "registrations"];
-const PRINT_REPLACE_SELECTORS = ['#companyDetails', '#invoiceNumber', '#phoneField', '#billTo', '#shipTo', '#invoiceNote', '.product-name', '.qty', '.rate', '.amount', '#invoiceDate'];
+const FIRESTORE_BACKUP_COLLECTIONS = ["users", "invoices", "products", "customers", "stocks", "settings", "deleteRequests"];
 
 function getStorageByteSize(key, value) {
     return (String(key).length + String(value ?? '').length) * 2;
@@ -592,7 +547,10 @@ function getCacheItemCount(key, value) {
     try {
         const parsed = JSON.parse(value);
         if (Array.isArray(parsed)) return parsed.length;
-        if (parsed && typeof parsed === 'object') return Object.keys(parsed).length;
+        if (parsed && typeof parsed === 'object') {
+            if (Array.isArray(parsed.items)) return parsed.items.length;
+            return Object.keys(parsed).length;
+        }
     } catch (e) { /* plain string */ }
     return value ? 1 : 0;
 }
@@ -610,6 +568,7 @@ function categorizeStorageKey(key) {
     if (key === REMEMBER_ME_KEY) return 'Remember Me (Auth)';
     if (key === LOGIN_SESSION_KEY) return 'Login Session';
     if (key.startsWith(`${CACHE_KEYS.CUSTOMERS}_`)) return 'User Customers Cache';
+    if (key.startsWith(`${CACHE_KEYS.SELL_HISTORY}_`)) return 'User Sell History Cache';
     if (key.startsWith('admin_cache_customers_')) return 'Admin Shop Info Cache';
     if (key.startsWith('admin_cache_sales_')) return 'Admin User Sales Cache';
     if (key.startsWith('local_cache_version_')) return 'Remote Sync Version';
@@ -681,6 +640,47 @@ function restoreFirestoreFields(value) {
     return value;
 }
 
+function serializeFirestoreForBackup(value) {
+    if (value === null || value === undefined) return value;
+    if (typeof value.toMillis === 'function') {
+        return { seconds: value.seconds, nanoseconds: value.nanoseconds };
+    }
+    if (Array.isArray(value)) return value.map(serializeFirestoreForBackup);
+    if (typeof value === 'object') {
+        const out = {};
+        for (const [k, v] of Object.entries(value)) out[k] = serializeFirestoreForBackup(v);
+        return out;
+    }
+    return value;
+}
+
+function parseProductsTxt(text) {
+    const cleaned = String(text || '').replace(/^\uFEFF/, '');
+    const toImport = [];
+    const hasBlankSeparators = /\r?\n\s*\r?\n/.test(cleaned);
+
+    if (hasBlankSeparators) {
+        cleaned.split(/\r?\n\s*\r?\n/).map(b => b.trim()).filter(Boolean).forEach(block => {
+            const lines = block.split(/\r?\n/).map(l => l.trim()).filter(l => l !== '');
+            const name = lines[0];
+            if (!name) return;
+            const priceRaw = lines[1];
+            const price = priceRaw === undefined || priceRaw === '' ? 0 : parseFloat(priceRaw);
+            if (!isNaN(price)) toImport.push({ name, price });
+        });
+    } else {
+        const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(l => l !== '');
+        for (let i = 0; i < lines.length; i += 2) {
+            const name = lines[i];
+            if (!name) continue;
+            const priceRaw = lines[i + 1];
+            const price = priceRaw === undefined || priceRaw === '' ? 0 : parseFloat(priceRaw);
+            if (!isNaN(price)) toImport.push({ name, price });
+        }
+    }
+    return toImport;
+}
+
 async function restoreBackupCollection(colName, docs) {
     if (!docs?.length) return 0;
     let count = 0;
@@ -743,6 +743,61 @@ function getMonitorUpdatedAtMs(inv) {
 
 function sortMonitorCache(list) {
     return [...list].sort((a, b) => getMonitorUpdatedAtMs(b) - getMonitorUpdatedAtMs(a));
+}
+
+function getSellHistoryCacheKey(userId) {
+    return `${CACHE_KEYS.SELL_HISTORY}_${userId}`;
+}
+
+function loadSellHistoryCache(userId) {
+    try {
+        const raw = localStorage.getItem(getSellHistoryCacheKey(userId));
+        if (!raw) return { items: [], historyVersion: 0 };
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return { items: parsed, historyVersion: 0 };
+        return { items: parsed.items || [], historyVersion: parsed.historyVersion || 0 };
+    } catch (e) {
+        return { items: [], historyVersion: 0 };
+    }
+}
+
+function sortSellHistoryCache(list) {
+    return [...list].sort((a, b) => getInvoiceSortTime(b) - getInvoiceSortTime(a));
+}
+
+function saveSellHistoryCache(userId, items, historyVersion) {
+    const sorted = sortSellHistoryCache(items).slice(0, SELL_HISTORY_CACHE_MAX);
+    localStorage.setItem(getSellHistoryCacheKey(userId), JSON.stringify({ items: sorted, historyVersion }));
+}
+
+function invalidateSellHistoryCache(userId) {
+    localStorage.removeItem(getSellHistoryCacheKey(userId));
+}
+
+function prependSellHistoryCache(userId, invoice) {
+    const cache = loadSellHistoryCache(userId);
+    const localVersions = getLocalMonitorVersions();
+    const newHistoryVersion = localVersions.historyVersion + 1;
+    const newSalesVersion = localVersions.salesVersion + 1;
+    const merged = [{ ...invoice }, ...cache.items.filter(i => i.id !== invoice.id)];
+    saveSellHistoryCache(userId, merged, newHistoryVersion);
+    saveLocalMonitorVersions(newSalesVersion, newHistoryVersion);
+}
+
+function removeSellHistoryCacheItem(userId, invoiceId) {
+    const cache = loadSellHistoryCache(userId);
+    saveSellHistoryCache(userId, cache.items.filter(i => i.id !== invoiceId), cache.historyVersion);
+}
+
+function updateSellHistoryLoadMoreButton(hasMore) {
+    const container = document.getElementById('sellHistoryLoadMoreContainer');
+    if (!container) return;
+    if (hasMore) {
+        container.innerHTML = '<button class="btn btn-secondary btn-sm" id="loadMoreSellHistoryBtn">Load More</button>';
+        document.getElementById('loadMoreSellHistoryBtn').onclick = () => loadSellHistoryInvoices(true);
+    } else {
+        container.innerHTML = '';
+    }
 }
 
 function getLocalMonitorVersions() {
@@ -1020,287 +1075,6 @@ function extractInvoiceNumber(str) {
     return parseInt(matches[matches.length - 1]) || 0;
 }
 
-function getProductDealerPrice(product) {
-    if (!product) return 0;
-    return parseFloat(product.dealerPrice ?? product.price) || 0;
-}
-
-function getProductMpoPrice(product) {
-    if (!product) return 0;
-    return parseFloat(product.mpoPrice ?? product.price) || 0;
-}
-
-function getActiveRateType() {
-    if (currentUser === 'admin') {
-        return document.getElementById('adminRateTypeSelect')?.value === 'mpo' ? 'mpo' : 'dealer';
-    }
-    return currentUserType === 'mpo' ? 'mpo' : 'dealer';
-}
-
-function getProductPriceForUser(product) {
-    if (!product) return 0;
-    if (getActiveRateType() === 'mpo') return getProductMpoPrice(product);
-    return getProductDealerPrice(product);
-}
-
-function getInvoiceRows() {
-    const tbody = document.getElementById('invoiceBody');
-    return tbody ? [...tbody.querySelectorAll('tr')] : [];
-}
-
-function formatRegDate(ts) {
-    if (!ts) return '';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    if (isNaN(d.getTime())) return '';
-    return d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
-async function submitRegistration() {
-    if (!db) return alert("Firebase not connected!");
-    const name = document.getElementById('regName').value.trim();
-    const address = document.getElementById('regAddress').value.trim();
-    const mobile = document.getElementById('regMobile').value.trim();
-    const errEl = document.getElementById('regError');
-    const okEl = document.getElementById('regSuccess');
-    const btn = document.getElementById('submitRegistrationBtn');
-    errEl.style.display = 'none';
-    okEl.style.display = 'none';
-    if (!name || !address || !mobile) {
-        errEl.textContent = 'Please fill all fields (Name, Address, Mobile).';
-        errEl.style.display = 'block';
-        return;
-    }
-    btn.disabled = true;
-    btn.textContent = 'Submitting...';
-    try {
-        await addDoc(collection(db, "registrations"), {
-            name, address, mobile,
-            read: false,
-            createdAt: serverTimestamp()
-        });
-        document.getElementById('regName').value = '';
-        document.getElementById('regAddress').value = '';
-        document.getElementById('regMobile').value = '';
-        okEl.textContent = 'Registration submitted successfully! Admin will review your request.';
-        okEl.style.display = 'block';
-    } catch (e) {
-        console.error(e);
-        errEl.textContent = 'Submission failed. Please try again.';
-        errEl.style.display = 'block';
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Registration';
-    }
-}
-
-async function fetchHowToRegText() {
-    let lastError = null;
-    for (const url of HOW_TO_REG_URLS) {
-        try {
-            const res = await fetch(url, { cache: 'no-store' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const text = (await res.text()).trim();
-            if (text) return text;
-        } catch (e) {
-            lastError = e;
-        }
-    }
-    throw lastError || new Error('No content');
-}
-
-async function showHowToRegistration() {
-    const modal = document.getElementById('howToRegModal');
-    const content = document.getElementById('howToRegContent');
-    modal.style.display = 'flex';
-    content.textContent = 'Loading...';
-    try {
-        content.textContent = await fetchHowToRegText();
-    } catch (e) {
-        content.textContent = 'Could not load instructions. Please check your internet connection and try again.';
-    }
-}
-
-async function updateNotificationBadge() {
-    if (currentUser !== 'admin' || !db) return;
-    const badge = document.getElementById('notificationBadge');
-    const adminBadge = document.getElementById('adminNotificationBadge');
-    try {
-        const q = query(collection(db, "registrations"), where("read", "==", false));
-        const snap = await getCountFromServer(q);
-        const count = snap.data().count || 0;
-        [badge, adminBadge].forEach(el => {
-            if (!el) return;
-            if (count > 0) {
-                el.textContent = count > 99 ? '99+' : String(count);
-                el.style.display = 'inline-flex';
-            } else {
-                el.style.display = 'none';
-            }
-        });
-    } catch (e) {
-        console.warn('Notification badge update failed:', e);
-    }
-}
-
-async function showNotifications(reset = true) {
-    document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
-    document.getElementById('notificationSection').style.display = 'block';
-    const list = document.getElementById('notificationList');
-    const loadMoreBtn = document.getElementById('loadMoreNotificationsBtn');
-    if (reset) {
-        notificationLastDoc = null;
-        list.innerHTML = '<div class="notification-loading">Loading...</div>';
-        loadMoreBtn.style.display = 'none';
-    }
-    try {
-        let q = query(collection(db, "registrations"), orderBy("createdAt", "desc"), limit(NOTIFICATION_PAGE_SIZE));
-        if (!reset && notificationLastDoc) {
-            q = query(collection(db, "registrations"), orderBy("createdAt", "desc"), startAfter(notificationLastDoc), limit(NOTIFICATION_PAGE_SIZE));
-        }
-        const snap = await getDocs(q);
-        if (reset && snap.empty) {
-            list.innerHTML = '<div class="notification-empty">No notifications yet.</div>';
-            loadMoreBtn.style.display = 'none';
-            return;
-        }
-        if (reset) list.innerHTML = '';
-        snap.docs.forEach(d => {
-            const data = d.data();
-            const isUnread = data.read !== true;
-            const item = document.createElement('div');
-            item.className = 'notification-item' + (isUnread ? ' unread' : '');
-            item.innerHTML = `
-                <div class="notification-item-header">
-                    <strong>${data.name || 'Unknown'}</strong>
-                    ${isUnread ? '<span class="notification-unread-dot"></span>' : ''}
-                    <span class="notification-date">${formatRegDate(data.createdAt)}</span>
-                </div>
-                <div class="notification-item-body">
-                    <div><b>Mobile:</b> ${data.mobile || '-'}</div>
-                    <div><b>Address:</b> ${data.address || '-'}</div>
-                </div>
-                <div class="notification-item-actions">
-                    <button class="btn btn-danger btn-sm del-notif" data-id="${d.id}">Delete</button>
-                </div>
-            `;
-            item.onclick = async (e) => {
-                if (e.target.closest('.del-notif')) return;
-                if (isUnread) {
-                    try {
-                        await updateDoc(doc(db, "registrations", d.id), { read: true });
-                        item.classList.remove('unread');
-                        const dot = item.querySelector('.notification-unread-dot');
-                        if (dot) dot.remove();
-                        updateNotificationBadge();
-                    } catch (err) { console.warn(err); }
-                }
-            };
-            item.querySelector('.del-notif').onclick = async (e) => {
-                e.stopPropagation();
-                if (!confirm('Delete this notification?')) return;
-                try {
-                    await deleteDoc(doc(db, "registrations", d.id));
-                    item.remove();
-                    if (!list.children.length) list.innerHTML = '<div class="notification-empty">No notifications yet.</div>';
-                    updateNotificationBadge();
-                } catch (err) { alert('Delete failed!'); }
-            };
-            list.appendChild(item);
-        });
-        if (snap.docs.length > 0) notificationLastDoc = snap.docs[snap.docs.length - 1];
-        loadMoreBtn.style.display = snap.docs.length >= NOTIFICATION_PAGE_SIZE ? 'inline-block' : 'none';
-    } catch (e) {
-        console.error(e);
-        if (reset) list.innerHTML = '<div class="notification-empty">Error loading notifications.</div>';
-    }
-}
-
-async function deleteAllNotifications() {
-    if (!confirm('Delete ALL registration notifications?')) return;
-    try {
-        const snap = await getDocs(collection(db, "registrations"));
-        if (snap.empty) return alert('No notifications to delete.');
-        const chunks = [];
-        for (let i = 0; i < snap.docs.length; i += 450) chunks.push(snap.docs.slice(i, i + 450));
-        for (const chunk of chunks) {
-            const batch = writeBatch(db);
-            chunk.forEach(d => batch.delete(d.ref));
-            await batch.commit();
-        }
-        notificationLastDoc = null;
-        document.getElementById('notificationList').innerHTML = '<div class="notification-empty">No notifications yet.</div>';
-        document.getElementById('loadMoreNotificationsBtn').style.display = 'none';
-        updateNotificationBadge();
-        alert('All notifications deleted.');
-    } catch (e) { alert('Error deleting notifications!'); }
-}
-
-function validateInvoiceRows() {
-    const rows = [];
-    let isValid = true;
-    getInvoiceRows().forEach(r => {
-        const nameInput = r.querySelector('.product-name');
-        const name = nameInput ? (nameInput.value || nameInput.textContent || '').trim() : '';
-        const pid = r.querySelector('.product-id')?.value || '';
-        if (!name || !pid) { isValid = false; return; }
-        rows.push({
-            productId: pid,
-            name: name,
-            qty: parseFloat(r.querySelector('.qty').value) || 0,
-            rate: parseFloat(r.querySelector('.rate').value) || 0,
-            amount: parseFloat(r.querySelector('.amount').value) || 0
-        });
-    });
-    return { isValid, rows };
-}
-
-function applyShrinkToWrapper(wrapper, rowCount) {
-    wrapper.classList.remove('shrink-level-1', 'shrink-level-2', 'shrink-level-3', 'shrink-level-4');
-    if (rowCount > 40) wrapper.classList.add('shrink-level-4');
-    else if (rowCount > 30) wrapper.classList.add('shrink-level-3');
-    else if (rowCount > 22) wrapper.classList.add('shrink-level-2');
-    else if (rowCount > 15) wrapper.classList.add('shrink-level-1');
-}
-
-function applyPrintReplacementsToRoot(root) {
-    PRINT_REPLACE_SELECTORS.forEach(s => {
-        root.querySelectorAll(s).forEach(input => {
-            const rep = replaceWithDiv(input);
-            if (input.parentNode) input.parentNode.replaceChild(rep, input);
-        });
-    });
-    root.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(el => el.remove());
-}
-
-function buildPrintPreviewWrapper() {
-    const wrapper = document.getElementById('mainInvoiceWrapper').cloneNode(true);
-    wrapper.querySelectorAll('.no-print, .modal-overlay, .product-popup').forEach(el => el.remove());
-    const container = wrapper.querySelector('.invoice-container');
-    if (container) container.classList.remove('screen-dark');
-    const origLogo = document.getElementById('logoPreview');
-    const cloneLogo = wrapper.querySelector('.logo-area img');
-    if (origLogo && cloneLogo) {
-        cloneLogo.src = origLogo.src;
-        cloneLogo.style.display = origLogo.style.display || '';
-    }
-    applyPrintReplacementsToRoot(wrapper);
-    wrapper.classList.add('view-print-exact');
-    wrapper.removeAttribute('id');
-    wrapper.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-    applyShrinkToWrapper(wrapper, getInvoiceRows().length);
-    return wrapper;
-}
-
-function viewPrintInvoice() {
-    const { isValid, rows } = validateInvoiceRows();
-    if (!isValid || rows.length === 0) return alert("Please select products!");
-    calculateGrandTotal();
-    const previewArea = document.getElementById('viewPrintPreviewArea');
-    previewArea.innerHTML = '';
-    previewArea.appendChild(buildPrintPreviewWrapper());
-    document.getElementById('viewPrintModal').style.display = 'flex';
-}
-
 async function performLogin() {
     if (!db) return alert("Firebase not connected!");
     const userEl = document.getElementById('loginUsername');
@@ -1332,11 +1106,10 @@ async function showMainApp() {
     const isAdmin = (currentUser === 'admin');
     document.getElementById('adminPanelBtn').style.display = (isAdmin ? 'inline-block' : 'none');
     document.getElementById('btnSaveDefault').style.display = (isAdmin ? 'inline-block' : 'none');
-    document.getElementById('adminRateToggleWrap').style.display = (isAdmin ? 'flex' : 'none');
     document.getElementById('companyDetails').readOnly = !isAdmin;
     
     if (!window._appInitialized) { await initializeAppLogic(); window._appInitialized = true; }
-    if (isAdmin) updateNotificationBadge();
+    if (isAdmin) startDeleteNotifPolling();
 }
 
 async function initializeAppLogic() {
@@ -1351,7 +1124,6 @@ async function initializeAppLogic() {
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
             const userData = userSnap.data();
-            currentUserType = userData.userType === 'mpo' ? 'mpo' : 'dealer';
             const serverCacheVersion = userData.forceClearCache || 0;
             const localCacheVersion = parseInt(localStorage.getItem(`local_cache_version_${currentUser}`)) || 0;
             
@@ -1653,20 +1425,15 @@ function openProductPopup(input) {
     document.getElementById('productSearchInput').focus(); 
 }
 
-function getProductList() {
-    return Object.entries(globalProductMap).map(([mapId, p]) => ({ ...p, id: p.id || mapId }));
-}
-
 function filterProducts() {
     const qStr = document.getElementById('productSearchInput').value.toLowerCase();
     const list = document.getElementById('productSearchList');
-    const products = getProductList();
+    const products = Object.values(globalProductMap);
     const filtered = qStr ? products.filter(p => p.name && p.name.toLowerCase().includes(qStr)) : products;
     if (filtered.length === 0) { list.innerHTML = '<div class="product-list-item no-match">No products found</div>'; return; }
     list.innerHTML = filtered.map(p => {
-        const userPrice = getProductPriceForUser(p);
-        const priceDisplay = userPrice > 0 ? `BDT ${userPrice}` : 'Manual Price';
-        return `<div class="product-list-item" data-id="${p.id}" data-name="${p.name}" data-price="${userPrice}">${p.name} - ${priceDisplay}</div>`;
+        const priceDisplay = p.price && p.price > 0 ? `BDT ${p.price}` : 'Manual Price';
+        return `<div class="product-list-item" data-id="${p.id}" data-name="${p.name}" data-price="${p.price || 0}">${p.name} - ${priceDisplay}</div>`;
     }).join('');
     list.querySelectorAll('.product-list-item').forEach(item => {
         if (!item.classList.contains('no-match')) {
@@ -1692,10 +1459,9 @@ async function printInvoice() {
     if (!db) return alert("Firebase not connected!");
     const printBtn = document.getElementById('printBtn');
     const rows = []; let isValid = true;
-    getInvoiceRows().forEach(r => {
-        const nameInput = r.querySelector('.product-name');
-        const name = nameInput ? (nameInput.value || nameInput.textContent || '').trim() : '';
-        const pid = r.querySelector('.product-id')?.value || '';
+    document.querySelectorAll('#invoiceBody tr').forEach(r => {
+        const name = r.querySelector('.product-name').value;
+        const pid = r.querySelector('.product-id').value;
         if (!name || !pid) { isValid = false; return; }
         rows.push({ 
             productId: pid, 
@@ -1801,12 +1567,15 @@ async function printInvoice() {
 
         invalidateUsersCache();
         localStorage.removeItem(`admin_cache_sales_${currentUser}`);
+        prependSellHistoryCache(currentUser, { id: invRef.id, ...data });
         saveMonitorCache(mergeMonitorItems(loadMonitorCache(), [{ id: invRef.id, ...data }]));
 
         const nextInvText = data.invoiceNumber.replace(/\d+(?=\D*$)/, currentInvNum + 1);
         document.getElementById('invoiceNumber').value = nextInvText;
 
-        alert("Invoice saved successfully!"); window.print();
+        alert("Invoice saved successfully!");
+        reloadAfterPrint = true;
+        window.print();
     } catch (e) { console.error("Save Invoice Error:", e); alert("Error saving invoice!"); } finally { printBtn.disabled = false; printBtn.textContent = '🖨️ Print'; }
 }
 
@@ -1834,10 +1603,17 @@ function beforePrint() {
     savedPageTitle = document.title;
     document.title = getPrintDocumentTitle();
 
+    const rowCount = document.querySelectorAll('#invoiceBody tr').length;
     const wrapper = document.querySelector('.invoice-wrapper');
-    applyShrinkToWrapper(wrapper, getInvoiceRows().length);
+    wrapper.classList.remove('shrink-level-1', 'shrink-level-2', 'shrink-level-3', 'shrink-level-4');
+    
+    if (rowCount > 40) wrapper.classList.add('shrink-level-4');
+    else if (rowCount > 30) wrapper.classList.add('shrink-level-3');
+    else if (rowCount > 22) wrapper.classList.add('shrink-level-2');
+    else if (rowCount > 15) wrapper.classList.add('shrink-level-1');
 
-    PRINT_REPLACE_SELECTORS.forEach(s => { 
+    const selectors = ['#companyDetails','#invoiceNumber','#phoneField','#billTo','#shipTo','#invoiceNote','.product-name','.qty','.rate','.amount','#invoiceDate']; 
+    selectors.forEach(s => { 
         document.querySelectorAll(s).forEach(input => { 
             const rep = replaceWithDiv(input); 
             input.parentNode.insertBefore(rep, input); 
@@ -1854,10 +1630,14 @@ function afterPrint() {
         document.title = savedPageTitle;
         savedPageTitle = null;
     }
+    if (reloadAfterPrint) {
+        reloadAfterPrint = false;
+        location.reload();
+    }
 }
 
-async function deleteInvoiceWithRestore(invoiceId, callback) {
-    if (!confirm('Are you sure you want to delete this invoice? Stock will be restored and user accounting will be updated.')) return;
+async function deleteInvoiceWithRestore(invoiceId, callback, skipConfirm = false) {
+    if (!skipConfirm && !confirm('Are you sure you want to delete this invoice? Stock will be restored and user accounting will be updated.')) return;
     try {
         const invRef = doc(db, "invoices", invoiceId);
         const invSnap = await getDoc(invRef);
@@ -1902,6 +1682,8 @@ async function deleteInvoiceWithRestore(invoiceId, callback) {
         batch.delete(invRef);
         await batch.commit();
 
+        try { await deleteDoc(doc(db, "deleteRequests", invoiceId)); } catch (_) {}
+
         const versionTypes = ['salesVersion', 'historyVersion'];
         if (Object.keys(stockUpdates).length) versionTypes.push('stockVersion');
         await incrementVersions(versionTypes);
@@ -1910,6 +1692,7 @@ async function deleteInvoiceWithRestore(invoiceId, callback) {
             localStorage.removeItem(`admin_cache_sales_${data.user}`);
         }
         removeMonitorCacheItem(invoiceId);
+        if (data.user) removeSellHistoryCacheItem(data.user, invoiceId);
 
         alert("Invoice deleted, stock restored, and user accounting updated!");
         if (callback) callback();
@@ -2026,20 +1809,20 @@ async function showProducts() {
     document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
     document.getElementById('productSection').style.display = 'block';
     const tbody = document.getElementById('productTableBody');
-    tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
     
     // Initialize form with one empty row if it's empty
     resetProductForm();
 
     await refreshProductList();
     const products = Object.values(globalProductMap);
-    tbody.innerHTML = products.map(p => `<tr><td>${p.name}</td><td>BDT ${getProductDealerPrice(p)}</td><td>BDT ${getProductMpoPrice(p)}</td><td><button class="btn btn-primary btn-sm edit-p" data-id="${p.id}">Edit</button> <button class="btn btn-danger btn-sm del-p" data-id="${p.id}">Del</button></td>`).join('');
+    tbody.innerHTML = products.map(p => `<tr><td>${p.name}</td><td>BDT ${p.price || 0}</td><td><button class="btn btn-primary btn-sm edit-p" data-id="${p.id}">Edit</button> <button class="btn btn-danger btn-sm del-p" data-id="${p.id}">Del</button></td>`).join('');
     
     tbody.querySelectorAll('.edit-p').forEach(b => b.onclick = () => { 
         const p = globalProductMap[b.dataset.id]; 
         const formBody = document.getElementById('productFormBody');
         formBody.innerHTML = ''; // Clear all rows for edit
-        addProductManagementRow(p.name, getProductDealerPrice(p), getProductMpoPrice(p), p.id);
+        addProductManagementRow(p.name, p.price, p.id);
         document.getElementById('cancelProductEditBtn').style.display = 'inline-block';
         document.getElementById('saveProductsBtn').textContent = 'Update Product';
         document.getElementById('addNewProductRowBtn').style.display = 'none'; // Hide new row btn during single edit
@@ -2059,14 +1842,13 @@ async function showProducts() {
     });
 }
 
-function addProductManagementRow(name = '', dealerPrice = '', mpoPrice = '', id = '') {
+function addProductManagementRow(name = '', price = '', id = '') {
     const tbody = document.getElementById('productFormBody');
     const row = document.createElement('tr');
     row.style.background = "transparent";
     row.innerHTML = `
         <td style="padding: 5px; background: transparent; border: none;"><input type="text" class="p-name" value="${name}" placeholder="Product Name" style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 8px; border-radius: 6px;"></td>
-        <td style="padding: 5px; background: transparent; border: none;"><input type="number" class="p-dealer-price" value="${dealerPrice}" placeholder="0.00" step="0.01" style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 8px; border-radius: 6px;"></td>
-        <td style="padding: 5px; background: transparent; border: none;"><input type="number" class="p-mpo-price" value="${mpoPrice}" placeholder="0.00" step="0.01" style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 8px; border-radius: 6px;"></td>
+        <td style="padding: 5px; background: transparent; border: none;"><input type="number" class="p-price" value="${price}" placeholder="0.00" step="0.01" style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 8px; border-radius: 6px;"></td>
         <td style="text-align: center; padding: 5px; background: transparent; border: none;"><button class="btn btn-danger btn-sm remove-p-row" ${id ? 'disabled' : ''} style="padding: 5px 10px;">✕</button></td>
         <input type="hidden" class="p-id" value="${id}">
     `;
@@ -2085,11 +1867,10 @@ async function saveProducts() {
     let hasEmptyName = false;
     rows.forEach(row => {
         const name = row.querySelector('.p-name').value.trim();
-        const dealerPrice = parseFloat(row.querySelector('.p-dealer-price').value) || 0;
-        const mpoPrice = parseFloat(row.querySelector('.p-mpo-price').value) || 0;
+        const price = parseFloat(row.querySelector('.p-price').value) || 0;
         const id = row.querySelector('.p-id').value;
         if (name) {
-            productsToSave.push({ id, name, dealerPrice, mpoPrice });
+            productsToSave.push({ id, name, price });
         } else if (rows.length === 1 || id) {
             hasEmptyName = true;
         }
@@ -2105,9 +1886,7 @@ async function saveProducts() {
         for (const p of productsToSave) {
             const productData = { 
                 name: p.name, 
-                dealerPrice: p.dealerPrice,
-                mpoPrice: p.mpoPrice,
-                price: p.dealerPrice,
+                price: p.price, 
                 updatedAt: serverTimestamp() 
             };
             if (p.id) {
@@ -2141,12 +1920,18 @@ function resetProductForm() {
 
 async function exportProductsTxt() {
     try {
-        await syncProducts();
+        const snap = await getDocs(collection(db, "products"));
         let content = "";
-        getProductList().forEach(p => {
-            if (p.name && !p.deleted) content += `${p.name}\n${getProductDealerPrice(p)}\n${getProductMpoPrice(p)}\n\n`;
+        let count = 0;
+        snap.forEach(d => {
+            const p = d.data();
+            if (p.name && !p.deleted) {
+                content += `${p.name}\n${p.price ?? 0}\n\n`;
+                count++;
+            }
         });
-        const blob = new Blob([content], { type: "text/plain" });
+        if (!count) return alert("No products to export.");
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -2155,7 +1940,7 @@ async function exportProductsTxt() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    } catch (e) { alert("Error exporting!"); }
+    } catch (e) { console.error("Export products error:", e); alert("Error exporting!"); }
 }
 
 async function importProductsTxt(event) {
@@ -2166,52 +1951,48 @@ async function importProductsTxt(event) {
     try {
         const reader = new FileReader();
         reader.onload = async (e) => {
-            const text = e.target.result;
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l !== "");
-            const toImport = [];
-            let i = 0;
-            while (i < lines.length) {
-                const name = lines[i];
-                const dealerPrice = parseFloat(lines[i + 1]);
-                const third = lines[i + 2];
-                const mpoParsed = parseFloat(third);
-                if (name && !isNaN(dealerPrice) && third !== undefined && !isNaN(mpoParsed)) {
-                    toImport.push({ name, dealerPrice, mpoPrice: mpoParsed });
-                    i += 3;
-                } else if (name && !isNaN(dealerPrice)) {
-                    toImport.push({ name, dealerPrice, mpoPrice: dealerPrice });
-                    i += 2;
-                } else {
-                    i += 1;
+            try {
+                const toImport = parseProductsTxt(e.target.result);
+                if (!toImport.length) {
+                    status.textContent = '❌ No valid products found. Format: Product Name on one line, Price on next line, blank line between products.';
+                    event.target.value = '';
+                    return;
                 }
-            }
-            let count = 0;
-            for (let j = 0; j < toImport.length; j += 450) {
-                const chunk = toImport.slice(j, j + 450);
-                const batch = writeBatch(db);
-                chunk.forEach(p => {
-                    batch.set(doc(collection(db, "products")), {
-                        name: p.name,
-                        dealerPrice: p.dealerPrice,
-                        mpoPrice: p.mpoPrice,
-                        price: p.dealerPrice,
-                        updatedAt: serverTimestamp()
+                let count = 0;
+                for (let i = 0; i < toImport.length; i += 450) {
+                    const chunk = toImport.slice(i, i + 450);
+                    const batch = writeBatch(db);
+                    chunk.forEach(p => {
+                        batch.set(doc(collection(db, "products")), {
+                            name: p.name,
+                            price: p.price,
+                            updatedAt: serverTimestamp()
+                        });
                     });
-                });
-                await batch.commit();
-                count += chunk.length;
-            }
-            if (count > 0) {
+                    await batch.commit();
+                    count += chunk.length;
+                }
                 await incrementVersions(['productVersion']);
                 await refreshProductList();
                 await showProducts();
                 status.textContent = `✅ ${count} products imported.`;
                 alert(`Imported ${count} products successfully`);
-            } else status.textContent = '❌ No valid products found.';
+            } catch (err) {
+                console.error("Import products error:", err);
+                status.textContent = '❌ Error importing!';
+                alert("Error importing products!");
+            }
             event.target.value = '';
         };
-        reader.readAsText(file);
-    } catch (e) { status.textContent = '❌ Error importing!'; }
+        reader.onerror = () => {
+            status.textContent = '❌ Error reading file!';
+            event.target.value = '';
+        };
+        reader.readAsText(file, 'UTF-8');
+    } catch (e) {
+        status.textContent = '❌ Error importing!';
+        event.target.value = '';
+    }
 }
 
 async function showStock() {
@@ -2565,15 +2346,14 @@ async function showUsers() {
     document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
     document.getElementById('userSection').style.display = 'block';
     const tbody = document.getElementById('userTableBody');
-    tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
     try {
         const users = await getWithCache('ADMIN_USERS', async () => {
             const snap = await getDocs(collection(db, "users"));
             return snap.docs.map(d => ({ id: d.id, ...d.data() }));
         }, ADMIN_USERS_CACHE);
         tbody.innerHTML = users.map(u => {
-            const typeLabel = u.userType === 'mpo' ? 'MPO' : (u.userType === 'dealer' ? 'Dealer' : '-');
-            return `<tr><td>${u.id}</td><td>${u.password}</td><td>${typeLabel}</td><td>${u.id !== 'admin' ? `<button class="btn btn-danger btn-sm del-user" data-id="${u.id}">Delete</button>` : 'System'}</td>`;
+            return `<tr><td>${u.id}</td><td>${u.password}</td><td>${u.id !== 'admin' ? `<button class="btn btn-danger btn-sm del-user" data-id="${u.id}">Delete</button>` : 'System'}</td>`;
         }).join('');
         tbody.querySelectorAll('.del-user').forEach(b => b.onclick = async () => {
             if (confirm('Delete this user?')) {
@@ -2584,7 +2364,7 @@ async function showUsers() {
                 } catch (err) { alert("Error deleting!"); }
             }
         });
-    } catch (e) { tbody.innerHTML = '<tr><td colspan="4">Error occurred</td></tr>'; }
+    } catch (e) { tbody.innerHTML = '<tr><td colspan="3">Error occurred</td></tr>'; }
 }
 
 function showBackup() {
@@ -2739,12 +2519,10 @@ async function downloadUserShopInfo(userId) {
 async function createUser() {
     const user = document.getElementById('newRegUsername').value.trim();
     const pass = document.getElementById('newRegPassword').value.trim();
-    const userType = document.getElementById('newRegUserType').value || 'dealer';
     if (!user || !pass) return alert("Enter username and password!");
     try {
         await setDoc(doc(db, "users", user), {
             password: pass,
-            userType: userType,
             totalSales: 0,
             totalPaid: 0,
             invoiceCount: 0,
@@ -2753,7 +2531,6 @@ async function createUser() {
         invalidateUsersCache();
         document.getElementById('newRegUsername').value = '';
         document.getElementById('newRegPassword').value = '';
-        document.getElementById('newRegUserType').value = 'dealer';
         showUsers();
         alert("New user created successfully!");
     } catch (e) { alert("Error creating user!"); }
@@ -2826,7 +2603,7 @@ async function exportAllData() {
         };
         for (const colName of FIRESTORE_BACKUP_COLLECTIONS) {
             const snap = await getDocs(collection(db, colName));
-            backup[colName] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            backup[colName] = snap.docs.map(d => serializeFirestoreForBackup({ id: d.id, ...d.data() }));
             backup.metadata.totalDocuments += snap.size;
         }
         backup.localBrowserCache = exportBrowserCacheSnapshot();
@@ -2860,6 +2637,10 @@ async function importData(event) {
             try {
                 const backup = JSON.parse(e.target.result);
                 const backupData = backup.data || backup;
+                const hasDbData = FIRESTORE_BACKUP_COLLECTIONS.some(c => Array.isArray(backupData[c]) && backupData[c].length > 0);
+                if (!hasDbData && !backupData.localBrowserCache) {
+                    throw new Error('Invalid backup file: no database collections or local cache found.');
+                }
                 let restoredCount = 0;
 
                 for (const colName of FIRESTORE_BACKUP_COLLECTIONS) {
@@ -2908,7 +2689,7 @@ async function cleanAllData() {
     document.getElementById('cleanConfirmModal').style.display = 'none';
     status.textContent = '⏳ Deleting database & local cache...';
     try {
-        const collections = ["invoices", "customers", "stocks", "settings"];
+        const collections = ["invoices", "customers", "stocks", "settings", "deleteRequests"];
         if (includeProducts) collections.push("products");
 
         for (const colName of collections) {
@@ -2975,9 +2756,11 @@ async function openSellHistory(forceRefresh = false) {
     const tbody = document.getElementById('sellHistoryBody');
     modal.style.display = 'flex';
     tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+    document.getElementById('sellHistoryInvoicesBody').innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
 
     if (forceRefresh) {
         invalidateUsersCache();
+        invalidateSellHistoryCache(currentUser);
     }
 
     try {
@@ -3003,6 +2786,289 @@ async function openSellHistory(forceRefresh = false) {
         }
         tbody.innerHTML = html || '<tr><td colspan="5">No data found</td></tr>';
     } catch (e) { tbody.innerHTML = '<tr><td colspan="5">Error loading data</td></tr>'; }
+
+    await loadSellHistoryInvoices(false, forceRefresh);
+}
+
+async function fetchPendingDeleteRequestIds(userId) {
+    const pendingIds = new Set();
+    try {
+        const snap = await getDocs(query(collection(db, "deleteRequests"), where("status", "==", "pending")));
+        snap.forEach(d => {
+            if (d.data().user === userId) pendingIds.add(d.id);
+        });
+    } catch (e) {
+        console.warn("Pending delete requests fetch failed:", e);
+    }
+    return pendingIds;
+}
+
+async function loadSellHistoryInvoices(isLoadMore = false, forceRefresh = false) {
+    const tbody = document.getElementById('sellHistoryInvoicesBody');
+    if (!tbody || !db) return;
+
+    if (!isLoadMore) {
+        sellHistoryLastDoc = null;
+        document.getElementById('sellHistoryLoadMoreContainer').innerHTML = '';
+        if (forceRefresh) invalidateSellHistoryCache(currentUser);
+    }
+
+    const pendingIds = await fetchPendingDeleteRequestIds(currentUser);
+
+    if (!isLoadMore && !forceRefresh) {
+        const serverVersions = await getServerMonitorVersions();
+        const cache = loadSellHistoryCache(currentUser);
+        if (cache.items.length > 0 && cache.historyVersion === serverVersions.historyVersion) {
+            renderSellHistoryInvoices(cache.items, pendingIds, false);
+            updateSellHistoryLoadMoreButton(cache.items.length >= SELL_HISTORY_PAGE_SIZE);
+            return;
+        }
+    }
+
+    if (!isLoadMore) {
+        tbody.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+    }
+
+    try {
+        let q = query(
+            collection(db, "invoices"),
+            where("user", "==", currentUser),
+            orderBy("timestamp", "desc"),
+            limit(SELL_HISTORY_PAGE_SIZE)
+        );
+
+        if (isLoadMore && sellHistoryLastDoc) {
+            q = query(q, startAfter(sellHistoryLastDoc));
+        } else if (isLoadMore) {
+            const cache = loadSellHistoryCache(currentUser);
+            const oldest = cache.items[cache.items.length - 1];
+            if (oldest?.timestamp) {
+                q = query(q, startAfter(oldest.timestamp));
+            }
+        }
+
+        let snap;
+        try {
+            snap = await getDocs(q);
+        } catch (err) {
+            console.warn("Sell history orderBy failed, falling back:", err);
+            q = query(collection(db, "invoices"), where("user", "==", currentUser), limit(SELL_HISTORY_PAGE_SIZE));
+            if (isLoadMore && sellHistoryLastDoc) q = query(q, startAfter(sellHistoryLastDoc));
+            snap = await getDocs(q);
+        }
+
+        if (snap.empty && !isLoadMore) {
+            tbody.innerHTML = '<tr><td colspan="5">No invoices found.</td></tr>';
+            updateSellHistoryLoadMoreButton(false);
+            return;
+        }
+
+        if (snap.empty && isLoadMore) {
+            updateSellHistoryLoadMoreButton(false);
+            return;
+        }
+
+        const invoices = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+
+        if (!isLoadMore) {
+            const serverVersions = await getServerMonitorVersions();
+            saveSellHistoryCache(currentUser, invoices, serverVersions.historyVersion);
+            saveLocalMonitorVersions(serverVersions.salesVersion, serverVersions.historyVersion);
+            renderSellHistoryInvoices(invoices, pendingIds, false);
+        } else {
+            renderSellHistoryInvoices(invoices, pendingIds, true);
+        }
+
+        sellHistoryLastDoc = snap.docs[snap.docs.length - 1];
+        updateSellHistoryLoadMoreButton(snap.docs.length === SELL_HISTORY_PAGE_SIZE);
+    } catch (e) {
+        console.error("Sell History Invoices Error:", e);
+        if (!isLoadMore) tbody.innerHTML = '<tr><td colspan="5">Error loading invoices.</td></tr>';
+    }
+}
+
+function buildSellHistoryRowHtml(e, pendingIds) {
+    const json = encodeURIComponent(JSON.stringify(e));
+    const isPending = pendingIds.has(e.id);
+    const statusHtml = isPending
+        ? '<span class="invoice-status-pending">Pending</span>'
+        : '<span class="invoice-status-active">Active</span>';
+    const deleteBtn = isPending
+        ? '<button class="btn btn-secondary btn-sm" disabled>Pending</button>'
+        : `<button class="btn btn-danger btn-sm del-inv-user" data-id="${e.id}">Delete</button>`;
+    return `<tr>
+        <td>${e.date || ''}</td>
+        <td>${e.invoiceNumber || ''}</td>
+        <td>${e.currency || ''}${e.grandTotal || '0'}</td>
+        <td>${statusHtml}</td>
+        <td>
+            <button class="btn btn-primary btn-sm view-inv-user" data-json="${json}">View</button>
+            ${deleteBtn}
+        </td>
+    </tr>`;
+}
+
+function bindSellHistoryRowActions(rows) {
+    rows.forEach(row => {
+        row.querySelectorAll('.view-inv-user').forEach(b => {
+            b.onclick = () => {
+                loadInvoiceUI(JSON.parse(decodeURIComponent(b.dataset.json)));
+                document.getElementById('sellHistoryModal').style.display = 'none';
+            };
+        });
+        row.querySelectorAll('.del-inv-user').forEach(b => {
+            b.onclick = () => requestInvoiceDelete(b.dataset.id);
+        });
+    });
+}
+
+function renderSellHistoryInvoices(data, pendingIds, append = false) {
+    const tbody = document.getElementById('sellHistoryInvoicesBody');
+    if (!data.length && !append) {
+        tbody.innerHTML = '<tr><td colspan="5">No invoices found.</td></tr>';
+        return;
+    }
+    const rowsHtml = data.map(e => buildSellHistoryRowHtml(e, pendingIds)).join('');
+    if (append) {
+        const beforeCount = tbody.querySelectorAll('tr').length;
+        tbody.insertAdjacentHTML('beforeend', rowsHtml);
+        const newRows = [...tbody.querySelectorAll('tr')].slice(beforeCount);
+        bindSellHistoryRowActions(newRows);
+    } else {
+        tbody.innerHTML = rowsHtml;
+        bindSellHistoryRowActions([...tbody.querySelectorAll('tr')]);
+    }
+}
+
+async function refreshSellHistoryPendingState() {
+    const pendingIds = await fetchPendingDeleteRequestIds(currentUser);
+    document.querySelectorAll('#sellHistoryInvoicesBody tr').forEach(row => {
+        const delBtn = row.querySelector('.del-inv-user');
+        if (!delBtn) return;
+        const invoiceId = delBtn.dataset.id;
+        if (!pendingIds.has(invoiceId)) return;
+        const statusCell = row.cells[3];
+        if (statusCell) statusCell.innerHTML = '<span class="invoice-status-pending">Pending</span>';
+        delBtn.outerHTML = '<button class="btn btn-secondary btn-sm" disabled>Pending</button>';
+    });
+}
+
+async function requestInvoiceDelete(invoiceId) {
+    if (!confirm('Are you sure you want to request deletion of this invoice? Admin approval is required.')) return;
+    try {
+        const existing = await getDoc(doc(db, "deleteRequests", invoiceId));
+        if (existing.exists() && existing.data().status === 'pending') {
+            return alert('This invoice already has a pending delete request.');
+        }
+        const invSnap = await getDoc(doc(db, "invoices", invoiceId));
+        if (!invSnap.exists()) return alert('Invoice not found!');
+        const inv = invSnap.data();
+        if (inv.user !== currentUser) return alert('You can only delete your own invoices.');
+
+        await setDoc(doc(db, "deleteRequests", invoiceId), {
+            invoiceId,
+            user: currentUser,
+            invoiceNumber: inv.invoiceNumber || '',
+            date: inv.date || '',
+            grandTotal: inv.grandTotal || 0,
+            currency: inv.currency || '',
+            status: 'pending',
+            requestedAt: serverTimestamp()
+        });
+        alert('Delete request submitted! Waiting for admin approval.');
+        await refreshSellHistoryPendingState();
+    } catch (e) {
+        console.error("Delete Request Error:", e);
+        alert('Failed to submit delete request.');
+    }
+}
+
+async function fetchAllPendingDeleteRequests() {
+    try {
+        const q = query(collection(db, "deleteRequests"), where("status", "==", "pending"));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+        console.warn("Fetch pending delete requests failed:", e);
+        return [];
+    }
+}
+
+async function updateDeleteNotificationBadge() {
+    const badge = document.getElementById('deleteNotifBadge');
+    const btn = document.getElementById('deleteNotifBtn');
+    if (!badge || !btn || currentUser !== 'admin') return;
+    const requests = await fetchAllPendingDeleteRequests();
+    const count = requests.length;
+    if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : String(count);
+        badge.style.display = 'inline-flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function startDeleteNotifPolling() {
+    if (deleteNotifPollInterval) clearInterval(deleteNotifPollInterval);
+    if (currentUser !== 'admin') return;
+    updateDeleteNotificationBadge();
+    deleteNotifPollInterval = setInterval(updateDeleteNotificationBadge, 30000);
+}
+
+async function openDeleteNotificationPanel() {
+    const modal = document.getElementById('deleteNotifModal');
+    const list = document.getElementById('deleteNotifList');
+    if (!modal || !list) return;
+    modal.style.display = 'flex';
+    list.innerHTML = '<p>Loading...</p>';
+
+    const requests = await fetchAllPendingDeleteRequests();
+    if (!requests.length) {
+        list.innerHTML = '<p class="delete-notif-empty">No pending delete requests.</p>';
+        return;
+    }
+
+    list.innerHTML = requests.map(r => `
+        <div class="delete-notif-item">
+            <div class="delete-notif-info">
+                <strong>👤 ${r.user}</strong>
+                <span>Invoice: ${r.invoiceNumber || 'N/A'}</span>
+                <span>Date: ${r.date || ''}</span>
+                <span>Amount: ${r.currency || ''}${r.grandTotal || '0'}</span>
+            </div>
+            <div class="delete-notif-actions">
+                <button class="btn btn-success btn-sm approve-del-req" data-id="${r.invoiceId || r.id}">✓ Approve</button>
+                <button class="btn btn-danger btn-sm reject-del-req" data-id="${r.invoiceId || r.id}">✗ Reject</button>
+            </div>
+        </div>
+    `).join('');
+
+    list.querySelectorAll('.approve-del-req').forEach(b => b.onclick = () => approveDeleteRequest(b.dataset.id));
+    list.querySelectorAll('.reject-del-req').forEach(b => b.onclick = () => rejectDeleteRequest(b.dataset.id));
+}
+
+async function approveDeleteRequest(invoiceId) {
+    if (!confirm('Approve and permanently delete this invoice? Stock will be restored and user accounting will be updated.')) return;
+    await deleteInvoiceWithRestore(invoiceId, async () => {
+        await updateDeleteNotificationBadge();
+        showMonitor(false, true);
+        const requests = await fetchAllPendingDeleteRequests();
+        if (requests.length) openDeleteNotificationPanel();
+        else document.getElementById('deleteNotifModal').style.display = 'none';
+    }, true);
+}
+
+async function rejectDeleteRequest(invoiceId) {
+    if (!confirm('Reject this delete request? The invoice will remain active.')) return;
+    try {
+        await deleteDoc(doc(db, "deleteRequests", invoiceId));
+        alert('Delete request rejected.');
+        updateDeleteNotificationBadge();
+        openDeleteNotificationPanel();
+    } catch (e) {
+        console.error("Reject delete error:", e);
+        alert('Failed to reject request.');
+    }
 }
 
 window.updateAccountingField = async (userId, field, currentVal) => {
@@ -3067,25 +3133,14 @@ function initAppEvents() {
     document.getElementById('currencySelect').onchange = calculateGrandTotal;
     document.getElementById('discountPercent').oninput = calculateGrandTotal;
     document.getElementById('printBtn').onclick = printInvoice;
-    document.getElementById('viewPrintBtn').onclick = viewPrintInvoice;
-    document.getElementById('closeViewPrintBtn').onclick = () => { document.getElementById('viewPrintModal').style.display = 'none'; document.getElementById('viewPrintPreviewArea').innerHTML = ''; };
-    document.getElementById('viewPrintModalPrintBtn').onclick = () => { document.getElementById('viewPrintModal').style.display = 'none'; document.getElementById('viewPrintPreviewArea').innerHTML = ''; printInvoice(); };
-    document.getElementById('viewPrintModal').onclick = (e) => { if (e.target.id === 'viewPrintModal') { document.getElementById('viewPrintModal').style.display = 'none'; document.getElementById('viewPrintPreviewArea').innerHTML = ''; } };
-    document.getElementById('adminRateTypeSelect').onchange = () => { if (document.getElementById('productSearchPopup').style.display === 'flex') filterProducts(); };
-    document.getElementById('showRegistrationBtn').onclick = (e) => { e.preventDefault(); document.getElementById('registrationOverlay').style.display = 'flex'; };
-    document.getElementById('backToLoginBtn').onclick = () => { document.getElementById('registrationOverlay').style.display = 'none'; };
-    document.getElementById('submitRegistrationBtn').onclick = submitRegistration;
-    document.getElementById('showHowToRegBtn').onclick = (e) => { e.preventDefault(); showHowToRegistration(); };
-    document.getElementById('closeHowToRegBtn').onclick = () => document.getElementById('howToRegModal').style.display = 'none';
-    document.getElementById('howToRegModal').onclick = (e) => { if (e.target.id === 'howToRegModal') document.getElementById('howToRegModal').style.display = 'none'; };
     document.getElementById('sellHistoryBtn').onclick = () => openSellHistory();
     document.getElementById('refreshAccountingBtn').onclick = () => openSellHistory(true);
     document.getElementById('adminPanelBtn').onclick = () => { 
         document.getElementById('adminModal').style.display = 'flex'; 
         document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('monitorTabBtn').classList.add('active');
-        showMonitor();
-        updateNotificationBadge();
+        updateDeleteNotificationBadge();
+        showMonitor(); 
     };
     document.getElementById('closeSellHistoryBtn').onclick = () => document.getElementById('sellHistoryModal').style.display = 'none';
     document.getElementById('closeAdminBtn').onclick = () => document.getElementById('adminModal').style.display = 'none';
@@ -3094,9 +3149,6 @@ function initAppEvents() {
     document.getElementById('stockTabBtn').onclick = () => { document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('stockTabBtn').classList.add('active'); showStock(); };
     document.getElementById('monitorTabBtn').onclick = () => { document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('monitorTabBtn').classList.add('active'); showMonitor(); };
     document.getElementById('userTabBtn').onclick = () => { document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('userTabBtn').classList.add('active'); showUsers(); };
-    document.getElementById('notificationTabBtn').onclick = () => { document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('notificationTabBtn').classList.add('active'); showNotifications(true); };
-    document.getElementById('loadMoreNotificationsBtn').onclick = () => showNotifications(false);
-    document.getElementById('deleteAllNotificationsBtn').onclick = deleteAllNotifications;
     document.getElementById('backupTabBtn').onclick = () => { document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active')); document.getElementById('backupTabBtn').classList.add('active'); showBackup(); };
     
     // --- Sub-tabs in User Details ---
@@ -3147,6 +3199,8 @@ function initAppEvents() {
     document.getElementById('createUserBtn').onclick = createUser;
     document.getElementById('deleteAllSalesBtn').onclick = deleteAllSales;
     document.getElementById('refreshMonitorBtn').onclick = () => showMonitor(false, true);
+    document.getElementById('deleteNotifBtn').onclick = openDeleteNotificationPanel;
+    document.getElementById('closeDeleteNotifBtn').onclick = () => document.getElementById('deleteNotifModal').style.display = 'none';
     document.getElementById('exportDataBtn').onclick = exportAllData;
     document.getElementById('importFile').onchange = importData;
     document.getElementById('openCleanModalBtn').onclick = () => document.getElementById('cleanConfirmModal').style.display = 'flex';
