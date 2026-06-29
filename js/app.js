@@ -500,6 +500,8 @@ let activeProductInput = null;
 let printReplacements = [];
 let savedPageTitle = null;
 let reloadAfterPrint = false;
+let isPrintPrepared = false;
+let printFinishCallback = null;
 const MOBILE_SUGGESTION_MQ = window.matchMedia('(max-width: 768px)');
 
 // Pagination state
@@ -1575,7 +1577,7 @@ async function printInvoice() {
 
         alert("Invoice saved successfully!");
         reloadAfterPrint = true;
-        window.print();
+        openPrintDialog();
     } catch (e) { console.error("Save Invoice Error:", e); alert("Error saving invoice!"); } finally { printBtn.disabled = false; printBtn.textContent = '🖨️ Print'; }
 }
 
@@ -1600,6 +1602,8 @@ function getPrintDocumentTitle() {
 }
 
 function beforePrint() { 
+    if (isPrintPrepared) return;
+    isPrintPrepared = true;
     savedPageTitle = document.title;
     document.title = getPrintDocumentTitle();
 
@@ -1623,6 +1627,8 @@ function beforePrint() {
     }); 
 }
 function afterPrint() { 
+    if (!isPrintPrepared) return;
+    isPrintPrepared = false;
     const wrapper = document.querySelector('.invoice-wrapper');
     wrapper.classList.remove('shrink-level-1', 'shrink-level-2', 'shrink-level-3', 'shrink-level-4');
     printReplacements.forEach(i => { i.input.style.display = ''; if (i.rep.parentNode) i.rep.parentNode.removeChild(i.rep); }); printReplacements = []; 
@@ -1630,9 +1636,31 @@ function afterPrint() {
         document.title = savedPageTitle;
         savedPageTitle = null;
     }
-    if (reloadAfterPrint) {
-        reloadAfterPrint = false;
-        location.reload();
+    const shouldReload = reloadAfterPrint;
+    reloadAfterPrint = false;
+    const onDone = printFinishCallback;
+    printFinishCallback = null;
+    if (onDone) onDone();
+    if (shouldReload) location.reload();
+}
+
+function openPrintDialog(onDone) {
+    printFinishCallback = onDone || null;
+    beforePrint();
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            setTimeout(() => window.print(), 200);
+        });
+    });
+    if (window.matchMedia) {
+        const mq = window.matchMedia('print');
+        const onPrintModeEnd = (e) => {
+            if (!e.matches) {
+                mq.removeEventListener('change', onPrintModeEnd);
+                setTimeout(afterPrint, 150);
+            }
+        };
+        setTimeout(() => mq.addEventListener('change', onPrintModeEnd), 300);
     }
 }
 
@@ -3092,7 +3120,11 @@ async function directPrintInvoice(invoiceData) {
     try {
         document.getElementById('usernameDisplay').textContent = invoiceData.user || 'Unknown';
         loadInvoiceUI(invoiceData);
-        setTimeout(() => { window.print(); document.getElementById('usernameDisplay').textContent = originalUser; }, 500);
+        setTimeout(() => {
+            openPrintDialog(() => {
+                document.getElementById('usernameDisplay').textContent = originalUser;
+            });
+        }, 300);
     } catch (e) { alert("Print failed!"); document.getElementById('usernameDisplay').textContent = originalUser; }
 }
 
