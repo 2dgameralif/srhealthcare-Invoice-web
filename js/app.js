@@ -505,6 +505,9 @@ let printFinishCallback = null;
 let printCleanupTimer = null;
 const FORCE_IMMEDIATE_SYNC_KEY = 'force_immediate_sync_v1';
 const MOBILE_SUGGESTION_MQ = window.matchMedia('(max-width: 768px)');
+function isMobileViewport() {
+    return window.matchMedia('(max-width: 768px)').matches;
+}
 
 // Pagination state
 let historyLastDoc = null;
@@ -1468,6 +1471,7 @@ function filterProducts() {
 async function printInvoice() {
     if (!db) return alert("Firebase not connected!");
     const printBtn = document.getElementById('printBtn');
+    const isMobilePrintFlow = isMobileViewport();
     const rows = []; let isValid = true;
     document.querySelectorAll('#invoiceBody tr').forEach(r => {
         const name = r.querySelector('.product-name').value;
@@ -1500,6 +1504,12 @@ async function printInvoice() {
         note: document.getElementById('invoiceNote').value, 
         items: rows 
     };
+
+    if (isMobilePrintFlow) {
+        reloadAfterPrint = false;
+        openPrintDialog();
+    }
+
     printBtn.disabled = true; printBtn.textContent = 'Saving...';
     try {
         const batch = writeBatch(db);
@@ -1581,8 +1591,8 @@ async function printInvoice() {
         saveMonitorCache(mergeMonitorItems(loadMonitorCache(), [{ id: invRef.id, ...data }]));
 
         alert("Invoice saved successfully!");
-        reloadAfterPrint = true;
-        openPrintDialog();
+        reloadAfterPrint = !isMobilePrintFlow;
+        if (!isMobilePrintFlow) openPrintDialog();
     } catch (e) { console.error("Save Invoice Error:", e); alert("Error saving invoice!"); } finally { printBtn.disabled = false; printBtn.textContent = '🖨️ Print'; }
 }
 
@@ -1673,11 +1683,13 @@ function scheduleAfterPrintCleanup() {
         const mq = window.matchMedia('print');
         const onPrintEnd = (e) => {
             if (!e.matches) {
-                mq.removeEventListener('change', onPrintEnd);
+                if (typeof mq.removeEventListener === 'function') mq.removeEventListener('change', onPrintEnd);
+                else if (typeof mq.removeListener === 'function') mq.removeListener(onPrintEnd);
                 setTimeout(finish, 200);
             }
         };
-        setTimeout(() => mq.addEventListener('change', onPrintEnd), 300);
+        if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onPrintEnd);
+        else if (typeof mq.addListener === 'function') mq.addListener(onPrintEnd);
     }
 
     printCleanupTimer = setTimeout(finish, 5000);
@@ -1689,11 +1701,15 @@ function openPrintDialog(onDone) {
         clearTimeout(printCleanupTimer);
         printCleanupTimer = null;
     }
-    setTimeout(() => {
+    try {
         beforePrint();
         window.print();
         scheduleAfterPrintCleanup();
-    }, 100);
+    } catch (error) {
+        console.error('Print dialog error:', error);
+        afterPrint();
+        alert('Print dialog খুলতে সমস্যা হয়েছে। মোবাইলে browser share/print option ব্যবহার করুন।');
+    }
 }
 
 async function deleteInvoiceWithRestore(invoiceId, callback, skipConfirm = false) {
@@ -3162,11 +3178,9 @@ async function directPrintInvoice(invoiceData) {
     try {
         document.getElementById('usernameDisplay').textContent = invoiceData.user || 'Unknown';
         loadInvoiceUI(invoiceData);
-        setTimeout(() => {
-            openPrintDialog(() => {
-                document.getElementById('usernameDisplay').textContent = originalUser;
-            });
-        }, 300);
+        openPrintDialog(() => {
+            document.getElementById('usernameDisplay').textContent = originalUser;
+        });
     } catch (e) { alert("Print failed!"); document.getElementById('usernameDisplay').textContent = originalUser; }
 }
 
