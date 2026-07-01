@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Invoice Pro — Glass UI Theme (Optimized for performance)
+   Invoice Pro — Glass UI Theme (UI only — logic unchanged in app.js)
    ========================================================================== */
 
 :root {
@@ -41,13 +41,6 @@
     --font-sans: 'Inter', 'Noto Sans Bengali', 'Segoe UI', system-ui, sans-serif;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-top: env(safe-area-inset-top, 0px);
-    
-    /* Mobile-specific variables */
-    --mobile-blur-sm: 6px;
-    --mobile-blur-md: 10px;
-    --mobile-blur-lg: 16px;
-    --mobile-shadow-glass: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    --mobile-shadow-elevated: 0 10px 25px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -3435,83 +3428,6 @@ table .print-replacement { font-size: 11px; text-align: center; }
 .sell-history-load-more {
     text-align: center;
     padding: 12px 0 4px;
-}
-
-/* ==========================================================================
-   MOBILE PERFORMANCE OPTIMIZATIONS (< 768px)
-   ========================================================================== */
-@media screen and (max-width: 768px) {
-    /* Reduce blur intensity on mobile to ease GPU load */
-    #loginOverlay,
-    .login-card,
-    .screen-dark,
-    .logo-area,
-    .btn-save-default,
-    .product-popup,
-    .product-popup-content,
-    #installBtn,
-    #installModal,
-    .install-modal-content,
-    .modal-overlay,
-    .modal-content,
-    .suggestion-box,
-    .admin-tab-btn,
-    .add-product-form,
-    .sub-tab-container,
-    .cache-control-card,
-    .product-form-container,
-    .product-import-export-bar,
-    .storage-monitor-card {
-        backdrop-filter: blur(var(--mobile-blur-md)) !important;
-        -webkit-backdrop-filter: blur(var(--mobile-blur-md)) !important;
-    }
-
-    /* Simplify shadows on mobile */
-    .shadow-glass {
-        box-shadow: var(--mobile-shadow-glass) !important;
-    }
-    .shadow-elevated,
-    .login-card,
-    .product-popup-content,
-    .modal-content,
-    .install-modal-content,
-    #installBtn {
-        box-shadow: var(--mobile-shadow-elevated) !important;
-    }
-
-    /* Disable expensive animations/transitions that aren't transform/opacity */
-    * {
-        transition-property: opacity, transform, background-color, border-color, color !important;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-        transition-duration: 0.15s !important;
-    }
-
-    /* Optimize body pseudo-elements (background orbs) */
-    body::before,
-    body::after {
-        filter: blur(40px) !important;
-        opacity: 0.15 !important;
-        animation-duration: 30s !important;
-    }
-
-    /* Use will-change for potentially animated elements */
-    .login-card,
-    .modal-content,
-    .product-popup-content {
-        will-change: transform, opacity !important;
-    }
-
-    /* Optimize scrolling for better performance */
-    * {
-        -webkit-overflow-scrolling: touch !important;
-        scroll-behavior: auto !important; /* Disable smooth scroll on mobile for performance */
-    }
-
-    /* Reduce paint areas */
-    .invoice-container,
-    .modal-overlay {
-        transform: translateZ(0) !important;
-    }
 }
 
 /* Reduced motion */
