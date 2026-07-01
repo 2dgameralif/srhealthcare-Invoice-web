@@ -1291,82 +1291,69 @@ function repositionCustomerSuggestions() {
 }
 
 function initCustomerSuggestionListeners() {
-    let repositionTimeout = null;
     const onViewportChange = () => {
-        if (repositionTimeout) {
-            cancelAnimationFrame(repositionTimeout);
-        }
-        repositionTimeout = requestAnimationFrame(() => {
-            const box = document.getElementById('customerSuggestions');
-            if (box && box.style.display !== 'none') repositionCustomerSuggestions();
-        });
+        const box = document.getElementById('customerSuggestions');
+        if (box && box.style.display !== 'none') repositionCustomerSuggestions();
     };
-    window.addEventListener('resize', onViewportChange, { passive: true });
+    window.addEventListener('resize', onViewportChange);
     if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', onViewportChange, { passive: true });
-        window.visualViewport.addEventListener('scroll', onViewportChange, { passive: true });
+        window.visualViewport.addEventListener('resize', onViewportChange);
+        window.visualViewport.addEventListener('scroll', onViewportChange);
     }
-    window.addEventListener('scroll', onViewportChange, { passive: true, capture: true });
+    window.addEventListener('scroll', onViewportChange, true);
 }
 
-let filterCustomersTimeout = null;
 function filterCustomers() {
-    clearTimeout(filterCustomersTimeout);
-    filterCustomersTimeout = setTimeout(() => {
-        const qStr = document.getElementById('billTo').value.trim().toLowerCase();
-        const box = document.getElementById('customerSuggestions');
-        
-        // Ensure customers are synced if typing starts and list is empty
-        if (globalCustomerList.length === 0) syncCustomers();
-        
-        if (!qStr) { hideCustomerSuggestions(); return; }
-        
-        // Use a Set with a composite key (Name + Address + Phone) to allow different entries for same name
-        const uniqueCustomers = [];
-        const seenKeys = new Set();
-        
-        globalCustomerList.forEach(c => {
-            if (c.billTo && c.billTo.toLowerCase().includes(qStr)) {
-                const compositeKey = `${c.billTo}|${c.shipTo || ''}|${c.phone || ''}`.toLowerCase();
-                if (!seenKeys.has(compositeKey)) {
-                    uniqueCustomers.push(c);
-                    seenKeys.add(compositeKey);
-                }
+    const qStr = document.getElementById('billTo').value.trim().toLowerCase();
+    const box = document.getElementById('customerSuggestions');
+    
+    // Ensure customers are synced if typing starts and list is empty
+    if (globalCustomerList.length === 0) syncCustomers();
+    
+    if (!qStr) { hideCustomerSuggestions(); return; }
+    
+    // Use a Set with a composite key (Name + Address + Phone) to allow different entries for same name
+    const uniqueCustomers = [];
+    const seenKeys = new Set();
+    
+    globalCustomerList.forEach(c => {
+        if (c.billTo && c.billTo.toLowerCase().includes(qStr)) {
+            const compositeKey = `${c.billTo}|${c.shipTo || ''}|${c.phone || ''}`.toLowerCase();
+            if (!seenKeys.has(compositeKey)) {
+                uniqueCustomers.push(c);
+                seenKeys.add(compositeKey);
             }
-        });
-        
-        if (uniqueCustomers.length === 0) { hideCustomerSuggestions(); return; }
-        
-        // Use DocumentFragment for efficient DOM updates
-        const fragment = document.createDocumentFragment();
-        uniqueCustomers.forEach(c => {
-            const item = document.createElement('div');
-            item.className = 'suggestion-item';
-            item.dataset.billto = c.billTo;
-            item.dataset.shipto = c.shipTo || '';
-            item.dataset.phone = c.phone || '';
-            item.style.cssText = 'padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;';
-            item.innerHTML = `<strong>${c.billTo}</strong><br><small style="color: #666;">${c.shipTo || ''} ${c.phone ? ' | ' + c.phone : ''}</small>`;
-            
-            const applySuggestion = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                document.getElementById('billTo').value = item.dataset.billto;
-                document.getElementById('shipTo').value = item.dataset.shipto;
-                document.getElementById('phoneField').value = item.dataset.phone;
-                hideCustomerSuggestions();
-                autoResize(document.getElementById('billTo'));
-            };
-            item.addEventListener('pointerdown', applySuggestion);
-            fragment.appendChild(item);
-        });
-        
-        box.innerHTML = '';
-        box.appendChild(fragment);
-        
-        box.style.display = 'block';
-        repositionCustomerSuggestions();
-    }, 100); // 100ms debounce
+        }
+    });
+    
+    if (uniqueCustomers.length === 0) { hideCustomerSuggestions(); return; }
+    
+    box.innerHTML = uniqueCustomers.map(c => `
+        <div class="suggestion-item" 
+             data-billto="${c.billTo}" 
+             data-shipto="${c.shipTo || ''}" 
+             data-phone="${c.phone || ''}"
+             style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;">
+             <strong>${c.billTo}</strong><br>
+             <small style="color: #666;">${c.shipTo || ''} ${c.phone ? ' | ' + c.phone : ''}</small>
+        </div>
+    `).join('');
+    
+    box.style.display = 'block';
+    repositionCustomerSuggestions();
+    
+    box.querySelectorAll('.suggestion-item').forEach(item => {
+        const applySuggestion = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('billTo').value = item.dataset.billto;
+            document.getElementById('shipTo').value = item.dataset.shipto;
+            document.getElementById('phoneField').value = item.dataset.phone;
+            hideCustomerSuggestions();
+            autoResize(document.getElementById('billTo'));
+        };
+        item.addEventListener('pointerdown', applySuggestion);
+    });
 }
 
 async function dbFetchStock() { 
@@ -1451,29 +1438,18 @@ function openProductPopup(input) {
     document.getElementById('productSearchInput').focus(); 
 }
 
-let filterProductsTimeout = null;
 function filterProducts() {
-    clearTimeout(filterProductsTimeout);
-    filterProductsTimeout = setTimeout(() => {
-        const qStr = document.getElementById('productSearchInput').value.toLowerCase();
-        const list = document.getElementById('productSearchList');
-        const products = Object.values(globalProductMap);
-        const filtered = qStr ? products.filter(p => p.name && p.name.toLowerCase().includes(qStr)) : products;
-        if (filtered.length === 0) { 
-            list.innerHTML = '<div class="product-list-item no-match">No products found</div>'; 
-            return; 
-        }
-        
-        const fragment = document.createDocumentFragment();
-        filtered.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'product-list-item';
-            item.dataset.id = p.id;
-            item.dataset.name = p.name;
-            item.dataset.price = p.price || 0;
-            const priceDisplay = p.price && p.price > 0 ? `BDT ${p.price}` : 'Manual Price';
-            item.textContent = `${p.name} - ${priceDisplay}`;
-            
+    const qStr = document.getElementById('productSearchInput').value.toLowerCase();
+    const list = document.getElementById('productSearchList');
+    const products = Object.values(globalProductMap);
+    const filtered = qStr ? products.filter(p => p.name && p.name.toLowerCase().includes(qStr)) : products;
+    if (filtered.length === 0) { list.innerHTML = '<div class="product-list-item no-match">No products found</div>'; return; }
+    list.innerHTML = filtered.map(p => {
+        const priceDisplay = p.price && p.price > 0 ? `BDT ${p.price}` : 'Manual Price';
+        return `<div class="product-list-item" data-id="${p.id}" data-name="${p.name}" data-price="${p.price || 0}">${p.name} - ${priceDisplay}</div>`;
+    }).join('');
+    list.querySelectorAll('.product-list-item').forEach(item => {
+        if (!item.classList.contains('no-match')) {
             item.onclick = () => { 
                 activeProductInput.value = item.dataset.name; 
                 const row = activeProductInput.closest('tr'); 
@@ -1488,11 +1464,8 @@ function filterProducts() {
                     rateField.select();
                 }
             };
-            fragment.appendChild(item);
-        });
-        list.innerHTML = '';
-        list.appendChild(fragment);
-    }, 100); // 100ms debounce
+        }
+    });
 }
 
 async function printInvoice() {
