@@ -1075,6 +1075,45 @@ function formatDate(dateStr) {
     return `${day} ${month} ${year}`;
 }
 
+function formatDateTimeBD(invoice) {
+    let date;
+    // Try to get date from invoice's timestamp or updatedAt or date field
+    if (invoice?.timestamp?.toMillis) {
+        date = new Date(invoice.timestamp.toMillis());
+    } else if (invoice?.updatedAt?.toMillis) {
+        date = new Date(invoice.updatedAt.toMillis());
+    } else if (invoice?.timestamp) {
+        date = new Date(invoice.timestamp);
+    } else if (invoice?.updatedAt) {
+        date = new Date(invoice.updatedAt);
+    } else if (invoice?.date) {
+        date = new Date(invoice.date);
+    } else {
+        return formatDate(invoice?.date || '');
+    }
+    
+    if (isNaN(date.getTime())) {
+        return formatDate(invoice?.date || '');
+    }
+    
+    // Format date
+    const day = String(date.getDate()).padStart(2, '0');
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const dateStr = `${day} ${month} ${year}`;
+    
+    // Format Bangladesh time (Asia/Dhaka time zone) using Intl.DateTimeFormat
+    const timeStr = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Dhaka',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    }).format(date);
+    
+    return `<div style="font-weight:500;">${dateStr}</div><div style="font-size:0.85em;opacity:0.9;">${timeStr}</div>`;
+}
+
 function extractInvoiceNumber(str) {
     if (!str) return 0;
     const matches = str.match(/\d+/g);
@@ -2242,9 +2281,9 @@ function ensureMonitorLoadMoreContainer() {
 
 function buildMonitorRowHtml(e) {
     const json = encodeURIComponent(JSON.stringify(e));
-    return `<tr>
+    return `<tr style="height: 60px;">
         <td>${e.user || 'Unknown'}</td>
-        <td>${e.date || ''}</td>
+        <td>${formatDateTimeBD(e)}</td>
         <td>${e.invoiceNumber || ''}</td>
         <td>${e.currency || ''}${e.grandTotal || '0'}</td>
         <td>
