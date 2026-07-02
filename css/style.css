@@ -1436,6 +1436,45 @@ table .print-replacement { font-size: 11px; text-align: center; }
     white-space: nowrap;
 }
 
+/* Sell History & Accounting Invoices Table styles */
+#sellHistoryModal .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+#sellHistoryModal .table-wrapper table {
+    min-width: 600px;
+    table-layout: fixed;
+}
+#sellHistoryModal .table-wrapper table th:nth-child(1),
+#sellHistoryModal .table-wrapper table td:nth-child(1) { width: 20%; }
+#sellHistoryModal .table-wrapper table th:nth-child(2),
+#sellHistoryModal .table-wrapper table td:nth-child(2) { width: 20%; }
+#sellHistoryModal .table-wrapper table th:nth-child(3),
+#sellHistoryModal .table-wrapper table td:nth-child(3) { width: 20%; }
+#sellHistoryModal .table-wrapper table th:nth-child(4),
+#sellHistoryModal .table-wrapper table td:nth-child(4) { width: 15%; }
+#sellHistoryModal .table-wrapper table th:nth-child(5),
+#sellHistoryModal .table-wrapper table td:nth-child(5) { 
+    width: 25%; 
+    min-width: 180px;
+    overflow: visible;
+}
+
+#sellHistoryInvoicesBody tr {
+    height: 60px;
+}
+
+#sellHistoryInvoicesBody td:nth-child(5) {
+    min-width: 180px;
+    overflow: visible;
+}
+
+#sellHistoryInvoicesBody td:nth-child(5) .btn {
+    display: inline-block;
+    margin: 2px 3px;
+    white-space: nowrap;
+}
+
 .admin-section-header {
     display: flex;
     justify-content: space-between;
